@@ -113,14 +113,14 @@ impl Drop for IWbemClassWrapper {
 }
 
 pub struct QueryResultEnumerator<'a> {
-    wmi_con: &'a WMIConnection,
+    _wmi_con: &'a WMIConnection,
     p_enumerator: Option<Unique<IEnumWbemClassObject>>,
 }
 
 impl<'a> QueryResultEnumerator<'a> {
-    pub fn new(wmi_con: &'a WMIConnection, p_enumerator: *mut IEnumWbemClassObject) -> Self {
+    pub fn new(_wmi_con: &'a WMIConnection, p_enumerator: *mut IEnumWbemClassObject) -> Self {
         Self {
-            wmi_con,
+            _wmi_con,
             p_enumerator: Unique::new(p_enumerator),
         }
     }
@@ -143,9 +143,7 @@ impl<'a> Iterator for QueryResultEnumerator<'a> {
         let mut pcls_obj = NULL as *mut IWbemClassObject;
         let mut return_value = 0;
 
-        if self.p_enumerator.is_none() {
-            return None;
-        }
+        self.p_enumerator?;
 
         let raw_enumerator_prt = self.p_enumerator.unwrap().as_ptr();
 
