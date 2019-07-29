@@ -39,10 +39,10 @@ impl Variant {
         // variant_type has two 'forms':
         // 1. A simple type like `VT_BSTR` .
         // 2. An array of certain type like `VT_ARRAY | VT_BSTR`.
-        if variant_type as u32 & VT_ARRAY == VT_ARRAY {
+        if u32::from(variant_type) & VT_ARRAY == VT_ARRAY {
             let array: &*mut SAFEARRAY = unsafe { vt.n1.n2().n3.parray() };
 
-            let item_type = variant_type as u32 & VT_TYPEMASK;
+            let item_type = u32::from(variant_type) & VT_TYPEMASK;
 
             return Ok(Variant::Array(safe_array_to_vec(*array, item_type as u32)?));
         }
@@ -50,7 +50,7 @@ impl Variant {
         // See https://msdn.microsoft.com/en-us/library/cc237865.aspx for more info.
         // Rust can infer the return type of `vt.*Val()` calls,
         // but it's easier to read when the type is named explicitly.
-        let variant_value = match variant_type as u32 {
+        let variant_value = match u32::from(variant_type) {
             VT_BSTR => {
                 let bstr_ptr: &BSTR = unsafe { vt.n1.n2().n3.bstrVal() };
 
