@@ -1,5 +1,6 @@
 use crate::variant::Variant;
-use log::debug;
+//7-29-2019 RKBJR compiler warning unused import log::debug
+//use log::debug;
 use serde::{de, forward_to_deserialize_any, Deserialize};
 use std::fmt;
 use std::vec::IntoIter;
@@ -98,7 +99,8 @@ impl<'de> Deserialize<'de> for Variant {
             }
 
             #[inline]
-            fn visit_f64<E>(self, value: f64) -> Result<Self::Value, E> {
+			//7-29-2019 compiler warning unused variable value, prefixed with underscore
+            fn visit_f64<E>(self, _value: f64) -> Result<Self::Value, E> {
                 unimplemented!();
             }
 
