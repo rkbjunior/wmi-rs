@@ -5,8 +5,10 @@ use serde::de::{
 };
 use serde::forward_to_deserialize_any;
 
-use std::{iter::Peekable, ptr};
-use winapi::um::oleauto::VariantClear;
+//7-29-2019 compiler warning unused import ptr and variant clear
+//use std::{iter::Peekable, ptr};
+//use winapi::um::oleauto::VariantClear;
+use std::{iter::Peekable};
 
 use crate::error::Error;
 use crate::result_enumerator::IWbemClassWrapper;
@@ -73,7 +75,8 @@ impl<'de, 'a> VariantAccess<'de> for WMIEnum<'a, 'de> {
         Err(de::Error::invalid_type(unexp, &"newtype variant"))
     }
 
-    fn tuple_variant<V>(self, _len: usize, visitor: V) -> Result<V::Value, Self::Error>
+	//7-29-2019 RKBJR compiler warning unused variable visitor, prefixed with _
+    fn tuple_variant<V>(self, _len: usize, _visitor: V) -> Result<V::Value, Self::Error>
     where
         V: Visitor<'de>,
     {
@@ -84,7 +87,8 @@ impl<'de, 'a> VariantAccess<'de> for WMIEnum<'a, 'de> {
     fn struct_variant<V>(
         self,
         _fields: &'static [&'static str],
-        visitor: V,
+		//7-29-2019 RKBJR changed to match fix above, adding the prefix _
+        _visitor: V,
     ) -> Result<V::Value, Self::Error>
     where
         V: Visitor<'de>,
@@ -157,7 +161,8 @@ where
 impl<'de, 'a> de::Deserializer<'de> for &'a mut Deserializer<'de> {
     type Error = Error;
 
-    fn deserialize_any<V>(self, visitor: V) -> Result<V::Value, Self::Error>
+	//7-29-2019 RKBJR compiler warning unused variable added _ prefix
+    fn deserialize_any<V>(self, _visitor: V) -> Result<V::Value, Self::Error>
     where
         V: Visitor<'de>,
     {
@@ -210,7 +215,8 @@ impl<'de, 'a> de::Deserializer<'de> for &'a mut Deserializer<'de> {
 
     fn deserialize_struct<V>(
         self,
-        name: &'static str,
+		//7-29-2019 RKBJR added _ prefix
+        _name: &'static str,
         fields: &'static [&'static str],
         visitor: V,
     ) -> Result<V::Value, Self::Error>
