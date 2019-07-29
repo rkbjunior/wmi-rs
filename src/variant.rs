@@ -44,7 +44,7 @@ impl Variant {
 
             let item_type = u32::from(variant_type) & VT_TYPEMASK;
 
-            return Ok(Variant::Array(safe_array_to_vec(*array, item_type as u32)?));
+            return Ok(Variant::Array( unsafe { safe_array_to_vec(*array, item_type as u32)? } ));
         }
 
         // See https://msdn.microsoft.com/en-us/library/cc237865.aspx for more info.

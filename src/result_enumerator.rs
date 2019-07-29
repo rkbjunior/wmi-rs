@@ -53,7 +53,7 @@ impl IWbemClassWrapper {
             ))
         }?;
 
-        let res = safe_array_to_vec_of_strings(p_names);
+        let res = unsafe { safe_array_to_vec_of_strings(p_names) };
 
         unsafe {
             check_hres(SafeArrayDestroy(p_names))?;

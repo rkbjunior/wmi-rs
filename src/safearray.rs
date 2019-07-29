@@ -7,9 +7,10 @@ use widestring::WideCStr;
 use winapi::{
     shared::wtypes::*,
     shared::{
-        minwindef::UINT,
-        ntdef::{LONG, NULL},
-        winerror::HRESULT,
+        //minwindef::UINT,
+        //ntdef::{LONG, NULL},
+		ntdef::{NULL},
+        //winerror::HRESULT,
         wtypes::BSTR,
     },
     um::{oaidl::SAFEARRAY, oleauto::{
@@ -53,11 +54,11 @@ impl<T> SafeArrayAccessor<T> {
         let mut lower_bound: i32 = 0;
         let mut upper_bound: i32 = 0;
 
-        unsafe {
-            check_hres(SafeArrayGetLBound(arr, 1, &mut lower_bound as _))?;
-            check_hres(SafeArrayGetUBound(arr, 1, &mut upper_bound as _))?;
-            check_hres(SafeArrayAccessData(arr, &mut p_data))?;
-        }
+
+        check_hres(SafeArrayGetLBound(arr, 1, &mut lower_bound as _))?;
+        check_hres(SafeArrayGetUBound(arr, 1, &mut upper_bound as _))?;
+        check_hres(SafeArrayAccessData(arr, &mut p_data))?;
+
 
         Ok(Self {
             arr,
@@ -86,7 +87,7 @@ impl<T> Drop for SafeArrayAccessor<T> {
     }
 }
 
-pub fn safe_array_to_vec_of_strings(arr: *mut SAFEARRAY) -> Result<Vec<String>, Error> {
+pub unsafe fn safe_array_to_vec_of_strings(arr: *mut SAFEARRAY) -> Result<Vec<String>, Error> {
     let items = safe_array_to_vec(arr, VT_BSTR)?;
 
     let string_items = items
@@ -100,22 +101,22 @@ pub fn safe_array_to_vec_of_strings(arr: *mut SAFEARRAY) -> Result<Vec<String>, 
     Ok(string_items)
 }
 
-pub fn safe_array_to_vec(arr: *mut SAFEARRAY, item_type: u32) -> Result<Vec<Variant>, Error> {
+pub unsafe fn safe_array_to_vec(arr: *mut SAFEARRAY, item_type: u32) -> Result<Vec<Variant>, Error> {
     let mut items = vec![];
 
     match item_type {
         VT_I4 => {
-            let accessor = unsafe { SafeArrayAccessor::<i32>::new(arr)? };
+            let accessor = SafeArrayAccessor::<i32>::new(arr)?;
 
             for item in accessor.as_slice().iter() {
                 items.push(Variant::I4(*item))
             }
         }
         VT_BSTR => {
-            let accessor = unsafe { SafeArrayAccessor::<BSTR>::new(arr)? };
+            let accessor = SafeArrayAccessor::<BSTR>::new(arr)?;
 
             for item_bstr in accessor.as_slice().iter() {
-                let item: &WideCStr = unsafe { WideCStr::from_ptr_str(*item_bstr) };
+                let item: &WideCStr = WideCStr::from_ptr_str(*item_bstr);
 
                 items.push(Variant::String(item.to_string()?));
             }
