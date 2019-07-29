@@ -19,7 +19,9 @@ use winapi::{
             CoCreateInstance, CoInitializeEx, CoInitializeSecurity, CoSetProxyBlanket,
             CoUninitialize,
         },
-        objbase::{COINIT_MULTITHREADED, COINIT_APARTMENTTHREADED},
+		//7-29-2019 RKBJR compiler complained COINIT_APARTMENTTHREADED was an unused import
+        //objbase::{COINIT_MULTITHREADED, COINIT_APARTMENTTHREADED},
+		objbase::{COINIT_MULTITHREADED},
         objidl::EOAC_NONE,
         wbemcli::{CLSID_WbemLocator, IID_IWbemLocator, IWbemLocator, IWbemServices},
     },
@@ -80,7 +82,8 @@ impl Drop for COMLibrary {
 }
 
 pub struct WMIConnection {
-    com_con: Rc<COMLibrary>,
+	//7-29-2019 RKBJR Compiler complains that com_con is dead code, added a _ prefix
+    _com_con: Rc<COMLibrary>,
     p_loc: Option<Unique<IWbemLocator>>,
     p_svc: Option<Unique<IWbemServices>>,
 }
@@ -92,7 +95,8 @@ pub struct WMIConnection {
 impl WMIConnection {
     pub fn new(com_lib: Rc<COMLibrary>) -> Result<Self, Error> {
         let mut instance = Self {
-            com_con: com_lib,
+			//7-29-2018 RKBJR added _ to match struct definition that was changed
+            _com_con: com_lib,
             p_loc: None,
             p_svc: None,
         };
@@ -201,12 +205,14 @@ impl Drop for WMIConnection {
 }
 
 mod tests {
-    use super::*;
+	//7-29-2019 RKBJR compiler complained of unused import, moved super to declarations in fn it_works
+    //use super::*;
 
     #[test]
     fn it_works() {
-        let com_con = COMLibrary::new().unwrap();
-        let wmi_con = WMIConnection::new(com_con.into()).unwrap();
+		//7-29-2018 super::* above was causing compiler warning for unused import so moved super to each declartion here
+        let com_con = super::COMLibrary::new().unwrap();
+        let wmi_con = super::WMIConnection::new(com_con.into()).unwrap();
 
         let p_svc = wmi_con.svc();
 
