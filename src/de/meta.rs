@@ -26,7 +26,8 @@ where
 
         fn deserialize_newtype_struct<V>(
             self,
-            name: &'static str,
+			//7-29-2019 RKBJR compiler warning unused variable added _
+            _name: &'static str,
             visitor: V,
         ) -> Result<V::Value, Self::Error>
         where
@@ -74,20 +75,23 @@ where
 }
 
 mod tests {
-    use super::*;
-    use crate::Variant;
-    use serde::Deserialize;
-    use std::collections::HashMap;
+	//7-29-2019 RKBJR compiler warnings complained that these were all unused imports. Moved to declarations below.
+    //use super::*;
+    //use crate::Variant;
+    //use serde::Deserialize;
+    //use std::collections::HashMap;
 
     #[test]
     fn it_works() {
-        #[derive(Deserialize, Debug)]
+        #[derive(serde::Deserialize, Debug)]
+		#[allow(non_camel_case_types)]
+		#[allow(non_snake_case)]
         struct Win32_OperatingSystem {
             Caption: String,
             Name: String,
         }
 
-        let (name, fields) = struct_name_and_fields::<Win32_OperatingSystem>().unwrap();
+        let (name, fields) = super::struct_name_and_fields::<Win32_OperatingSystem>().unwrap();
 
         assert_eq!(name, "Win32_OperatingSystem");
         assert_eq!(fields, ["Caption", "Name"]);
@@ -95,7 +99,7 @@ mod tests {
 
     #[test]
     fn it_works_with_rename() {
-        #[derive(Deserialize, Debug)]
+        #[derive(serde::Deserialize, Debug)]
         #[serde(rename = "Win32_OperatingSystem")]
         #[serde(rename_all = "PascalCase")]
         struct Win32OperatingSystem {
@@ -103,7 +107,7 @@ mod tests {
             name: String,
         }
 
-        let (name, fields) = struct_name_and_fields::<Win32OperatingSystem>().unwrap();
+        let (name, fields) = super::struct_name_and_fields::<Win32OperatingSystem>().unwrap();
 
         assert_eq!(name, "Win32_OperatingSystem");
         assert_eq!(fields, ["Caption", "Name"]);
@@ -111,7 +115,7 @@ mod tests {
 
     #[test]
     fn it_fails_for_non_structs() {
-        let err = struct_name_and_fields::<HashMap<String, Variant>>().unwrap_err();
+        let err = super::struct_name_and_fields::<std::collections::HashMap<String, crate::Variant>>().unwrap_err();
 
         assert!(format!("{:?}", err).contains("Expected a named struct"));
     }
