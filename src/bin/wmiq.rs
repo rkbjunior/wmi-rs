@@ -3,7 +3,7 @@ use std::env::args;
 use wmi::{COMLibrary, Variant, WMIConnection};
 
 fn main() {
-    let wmi_con = WMIConnection::new(COMLibrary::new().unwrap().into()).unwrap();
+    let wmi_con = WMIConnection::new(COMLibrary::new().unwrap().into(),None).unwrap();
     let args: Vec<String> = args().collect();
     let query = match args.get(1) {
         None => {

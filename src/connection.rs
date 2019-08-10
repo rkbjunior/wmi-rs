@@ -84,6 +84,7 @@ impl Drop for COMLibrary {
 pub struct WMIConnection {
 	//7-29-2019 RKBJR Compiler complains that com_con is dead code, added a _ prefix
     _com_con: Rc<COMLibrary>,
+	remote_host_name: Option<String>,
     p_loc: Option<Unique<IWbemLocator>>,
     p_svc: Option<Unique<IWbemServices>>,
 }
@@ -93,10 +94,12 @@ pub struct WMIConnection {
 /// Currently does not support remote providers (e.g connecting to other computers).
 ///
 impl WMIConnection {
-    pub fn new(com_lib: Rc<COMLibrary>) -> Result<Self, Error> {
+    pub fn new(com_lib: Rc<COMLibrary>, remote_host: Option<String>) -> Result<Self, Error> {
+
         let mut instance = Self {
 			//7-29-2018 RKBJR added _ to match struct definition that was changed
             _com_con: com_lib,
+			remote_host_name: remote_host,
             p_loc: None,
             p_svc: None,
         };
@@ -145,7 +148,14 @@ impl WMIConnection {
 
         let mut p_svc = ptr::null_mut::<IWbemServices>();
 
-        let object_path = "ROOT\\CIMV2";
+		let object_path;
+
+		match &self.remote_host_name {
+			Some(rh) => object_path = format!("\\\\{}\\ROOT\\CIMV2",rh),
+			None => object_path = "ROOT\\CIMV2".to_string(),
+		}
+
+        //let object_path = "\\ROOT\\CIMV2";
         let object_path_bstr = WideCString::from_str(object_path)?;
 
         unsafe {
@@ -212,7 +222,7 @@ mod tests {
     fn it_works() {
 		//7-29-2018 super::* above was causing compiler warning for unused import so moved super to each declartion here
         let com_con = super::COMLibrary::new().unwrap();
-        let wmi_con = super::WMIConnection::new(com_con.into()).unwrap();
+        let wmi_con = super::WMIConnection::new(com_con.into(),None).unwrap();
 
         let p_svc = wmi_con.svc();
 
